@@ -1,0 +1,25 @@
+:root {
+  --brand: #1f7dd5;
+  --brand-dark: #0f5da4;
+  --text-primary: #182432;
+  --text-soft: #5e6e81;
+  --card-shadow: 0 14px 30px rgba(16, 42, 73, 0.08);
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text-primary);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(166, 214, 255, 0.45), transparent 38%),
+    radial-gradient(circle at 85% 22%, rgba(255, 224, 188, 0.45), transparent 36%),
+    linear-gradient(180deg, #eef5fd 0%, #f8fbff 36%, #f1f6fc 100%);
+}
