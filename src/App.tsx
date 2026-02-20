@@ -41,8 +41,7 @@ const storageKey = 'zhexin-seedance-mvp-v2'
 const donateStorageKey = 'zhexin-donate-config-v1'
 const usageStorageKey = 'zhexin-usage-v1'
 const apiStorageKey = 'zhexin-api-config-v1'
-const freeDailyLimit = 5
-const monetizationEnabled = false
+
 
 const defaultDonateConfig: { platform: DonatePlatform; url: string } = { platform: '爱发电', url: '' }
 const defaultApiConfig: ApiConfig = {
@@ -168,7 +167,7 @@ function buildTimeRanges(duration: number): string[] {
   return [`0-${a}秒`, `${a}-${b}秒`, `${b}-${c}秒`, `${c}-${duration}秒`]
 }
 
-const initialState: AppState = { title: '折新_Seedance提示词', mode: 'simple', ...presets['短剧片段'] }
+const initialState: AppState = { title: '豆包即梦_Seedance提示词', mode: 'simple', ...presets['短剧片段'] }
 
 function getTodayKey(): string {
   return new Date().toISOString().slice(0, 10)
@@ -201,7 +200,6 @@ function App() {
   const [simpleIdea, setSimpleIdea] = useState(initialState.subjectScene)
   const [copied, setCopied] = useState(false)
   const [showDonateConfig, setShowDonateConfig] = useState(false)
-  const [showPaywall, setShowPaywall] = useState(false)
   const [showApiModal, setShowApiModal] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(true)
   const [aiLoading, setAiLoading] = useState(false)
@@ -274,7 +272,6 @@ function App() {
   }, [donateConfig.url])
 
   const canDonate = /^https?:\/\/.+/i.test(donateUrl)
-  const remainingFree = Math.max(0, freeDailyLimit - usage.dailyCount)
 
   const warnings = useMemo(() => {
     const out: string[] = []
@@ -358,13 +355,6 @@ function App() {
   }
 
   const ensureQuotaOrShowPaywall = (): boolean => {
-    if (!monetizationEnabled) return true
-    const today = getTodayKey()
-    const current = usage.date === today ? usage.dailyCount : 0
-    if (current >= freeDailyLimit) {
-      setShowPaywall(true)
-      return false
-    }
     return true
   }
 
@@ -422,7 +412,7 @@ function App() {
   }
 
   const applyPreset = (p: PromptType) => {
-    setS((prev) => ({ ...prev, ...presets[p], promptType: p, title: `折新_${p}_提示词` }))
+    setS((prev) => ({ ...prev, ...presets[p], promptType: p, title: `豆包即梦_${p}_提示词` }))
     setSimpleIdea(presets[p].subjectScene)
     setEnhancedPrompt('')
   }
@@ -493,7 +483,7 @@ function App() {
     <div className="page">
       <header className="hero card">
         <div>
-          <p className="brand">折新</p>
+          <p className="brand">豆包即梦</p>
           <h1>Seedance 提示词工作台</h1>
           <p className="subtitle">默认给新手：你只要说想法，我来帮你组织成可用提示词。</p>
         </div>
@@ -501,23 +491,16 @@ function App() {
           <button className="ghostButton" onClick={() => applyPreset('短剧片段')}>一键示例</button>
           <button className="ghostButton" onClick={() => setShowApiModal(true)}>API进阶设置</button>
           <button className="donateButton" disabled={!canDonate} onClick={openDonateLink}>
-            {canDonate ? `支持折新（${donateConfig.platform}）` : '捐赠入口未配置'}
+            {canDonate ? `支持豆包即梦（${donateConfig.platform}）` : '捐赠入口未配置'}
           </button>
         </div>
       </header>
 
       <section className="quickBar card">
         <div className="quickMeta">
-          <strong>今日免费剩余：{remainingFree}/{freeDailyLimit}</strong>
           <span>累计生成：{usage.totalCount} 次</span>
-          {!monetizationEnabled ? <span className="freeTag">当前公测期：全功能免费开放</span> : null}
+          <span className="freeTag">完全免费，无次数限制</span>
         </div>
-        {monetizationEnabled ? (
-          <div className="quickActions">
-            <button className="planBtn" onClick={() => setShowPaywall(true)}>日卡 1.9 元 / 24h</button>
-            <button className="planBtn" onClick={() => setShowPaywall(true)}>周卡 6.9 元 / 7天</button>
-          </div>
-        ) : null}
       </section>
 
       <section className="toolbar card">
@@ -668,19 +651,6 @@ function App() {
         </div>
       ) : null}
 
-      {monetizationEnabled && showPaywall ? (
-        <div className="modalMask" onClick={() => setShowPaywall(false)}>
-          <div className="modalCard" onClick={(e) => e.stopPropagation()}>
-            <h3>支持折新，持续升级</h3>
-            <p>你今日免费次数已用完（{freeDailyLimit}次）。继续生成请支持创作者。</p>
-            <p>建议方案：日卡 1.9 元 / 24h，周卡 6.9 元 / 7天。</p>
-            <div className="actionRow">
-              <button onClick={openDonateLink} disabled={!canDonate}>立即支持</button>
-              <button className="ghostButton" onClick={() => setShowPaywall(false)}>继续编辑（暂不生成）</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   )
 }
