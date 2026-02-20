@@ -274,6 +274,7 @@ function App() {
   }, [donateConfig.url])
 
   const canDonate = /^https?:\/\/.+/i.test(donateUrl)
+  // @ts-expect-error 付费模式关闭时暂不使用
   const remainingFree = Math.max(0, freeDailyLimit - usage.dailyCount)
 
   const warnings = useMemo(() => {
@@ -508,16 +509,8 @@ function App() {
 
       <section className="quickBar card">
         <div className="quickMeta">
-          <strong>今日免费剩余：{remainingFree}/{freeDailyLimit}</strong>
-          <span>累计生成：{usage.totalCount} 次</span>
-          {!monetizationEnabled ? <span className="freeTag">当前公测期：全功能免费开放</span> : null}
+          <span className="freeTag">完全免费，无次数限制</span>
         </div>
-        {monetizationEnabled ? (
-          <div className="quickActions">
-            <button className="planBtn" onClick={() => setShowPaywall(true)}>日卡 1.9 元 / 24h</button>
-            <button className="planBtn" onClick={() => setShowPaywall(true)}>周卡 6.9 元 / 7天</button>
-          </div>
-        ) : null}
       </section>
 
       <section className="toolbar card">
