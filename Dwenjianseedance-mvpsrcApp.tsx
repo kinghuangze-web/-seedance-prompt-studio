@@ -168,7 +168,7 @@ function buildTimeRanges(duration: number): string[] {
   return [`0-${a}秒`, `${a}-${b}秒`, `${b}-${c}秒`, `${c}-${duration}秒`]
 }
 
-const initialState: AppState = { title: '豆包即梦_Seedance提示词', mode: 'simple', ...presets['短剧片段'] }
+const initialState: AppState = { title: '折新_Seedance提示词', mode: 'simple', ...presets['短剧片段'] }
 
 function getTodayKey(): string {
   return new Date().toISOString().slice(0, 10)
@@ -422,7 +422,7 @@ function App() {
   }
 
   const applyPreset = (p: PromptType) => {
-    setS((prev) => ({ ...prev, ...presets[p], promptType: p, title: `豆包即梦_${p}_提示词` }))
+    setS((prev) => ({ ...prev, ...presets[p], promptType: p, title: `折新_${p}_提示词` }))
     setSimpleIdea(presets[p].subjectScene)
     setEnhancedPrompt('')
   }
@@ -493,7 +493,7 @@ function App() {
     <div className="page">
       <header className="hero card">
         <div>
-          <p className="brand">豆包即梦</p>
+          <p className="brand">折新</p>
           <h1>Seedance 提示词工作台</h1>
           <p className="subtitle">默认给新手：你只要说想法，我来帮你组织成可用提示词。</p>
         </div>
@@ -501,7 +501,7 @@ function App() {
           <button className="ghostButton" onClick={() => applyPreset('短剧片段')}>一键示例</button>
           <button className="ghostButton" onClick={() => setShowApiModal(true)}>API进阶设置</button>
           <button className="donateButton" disabled={!canDonate} onClick={openDonateLink}>
-            {canDonate ? `支持豆包即梦（${donateConfig.platform}）` : '捐赠入口未配置'}
+            {canDonate ? `支持折新（${donateConfig.platform}）` : '捐赠入口未配置'}
           </button>
         </div>
       </header>
@@ -671,7 +671,7 @@ function App() {
       {monetizationEnabled && showPaywall ? (
         <div className="modalMask" onClick={() => setShowPaywall(false)}>
           <div className="modalCard" onClick={(e) => e.stopPropagation()}>
-            <h3>支持豆包即梦，持续升级</h3>
+            <h3>支持折新，持续升级</h3>
             <p>你今日免费次数已用完（{freeDailyLimit}次）。继续生成请支持创作者。</p>
             <p>建议方案：日卡 1.9 元 / 24h，周卡 6.9 元 / 7天。</p>
             <div className="actionRow">
