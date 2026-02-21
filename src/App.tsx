@@ -200,7 +200,6 @@ function App() {
   })
   const [simpleIdea, setSimpleIdea] = useState(initialState.subjectScene)
   const [copied, setCopied] = useState(false)
-  const [showDonateConfig, setShowDonateConfig] = useState(false)
   const [showPaywall, setShowPaywall] = useState(false)
   const [showApiModal, setShowApiModal] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(true)
@@ -274,8 +273,6 @@ function App() {
   }, [donateConfig.url])
 
   const canDonate = /^https?:\/\/.+/i.test(donateUrl)
-  // @ts-expect-error 付费模式关闭时暂不使用
-  const remainingFree = Math.max(0, freeDailyLimit - usage.dailyCount)
 
   const warnings = useMemo(() => {
     const out: string[] = []
@@ -500,10 +497,8 @@ function App() {
         </div>
         <div className="heroActions">
           <button className="ghostButton" onClick={() => applyPreset('短剧片段')}>一键示例</button>
-          <button className="ghostButton" onClick={() => setShowApiModal(true)}>API进阶设置</button>
-          <button className="donateButton" disabled={!canDonate} onClick={openDonateLink}>
-            {canDonate ? `支持豆包即梦（${donateConfig.platform}）` : '捐赠入口未配置'}
-          </button>
+          <button className="ghostButton" onClick={() => setShowApiModal(true)}>设置</button>
+          {canDonate && <button className="donateButton" onClick={openDonateLink}>支持作者</button>}
         </div>
       </header>
 
@@ -611,29 +606,13 @@ function App() {
         </main>
       )}
 
-      <section className="donateConfig card">
-        <div className="donateHeader">
-          <h2>创作者支持设置</h2>
-          <button className="ghostButton" onClick={() => setShowDonateConfig((v) => !v)}>
-            {showDonateConfig ? '收起' : '展开'}
-          </button>
-        </div>
-        {showDonateConfig ? (
-          <div className="donateForm">
-            <select value={donateConfig.platform} onChange={(e) => setDonateConfig((prev) => ({ ...prev, platform: e.target.value as DonatePlatform }))}>
-              <option>爱发电</option><option>Ko-fi</option><option>Buy Me a Coffee</option><option>其他</option>
-            </select>
-            <input value={donateConfig.url} onChange={(e) => setDonateConfig((prev) => ({ ...prev, url: e.target.value }))} placeholder="输入捐赠链接（例：https://ko-fi.com/xxx）" />
-            <button className="ghostButton" onClick={openDonateLink} disabled={!canDonate}>测试链接</button>
-          </div>
-        ) : null}
-      </section>
-
       {showApiModal ? (
         <div className="modalMask" onClick={() => setShowApiModal(false)}>
           <div className="modalCard large" onClick={(e) => e.stopPropagation()}>
-            <h3>API 进阶设置</h3>
-            <p className="helper">用于 AI 增强生成功能。默认不需要填写 API 也能使用本地智能生成。</p>
+            <h3>设置</h3>
+            
+            <h4 style={{margin: '1rem 0 0.5rem'}}>API 配置</h4>
+            <p className="helper">用于 AI 增强生成功能。默认不需要填写也能使用本地智能生成。</p>
             <div className="apiModalGrid">
               <select value={apiConfig.provider} onChange={(e) => setApiConfig((prev) => ({ ...prev, provider: e.target.value as ApiProvider }))}>
                 <option>OpenAI兼容</option>
@@ -644,18 +623,26 @@ function App() {
               <input type="password" value={apiConfig.apiKey} onChange={(e) => setApiConfig((prev) => ({ ...prev, apiKey: e.target.value }))} placeholder="API Key" />
               <label className="persistLabel">
                 <input type="checkbox" checked={apiConfig.persistKey} onChange={(e) => setApiConfig((prev) => ({ ...prev, persistKey: e.target.checked }))} />
-                浏览器持久保存 API Key（默认不勾选，仅会话内）
+                浏览器持久保存 API Key
               </label>
             </div>
+            
+            <h4 style={{margin: '1.5rem 0 0.5rem'}}>支持作者</h4>
+            <div className="apiModalGrid">
+              <select value={donateConfig.platform} onChange={(e) => setDonateConfig((prev) => ({ ...prev, platform: e.target.value as DonatePlatform }))}>
+                <option>爱发电</option><option>Ko-fi</option><option>Buy Me a Coffee</option><option>其他</option>
+              </select>
+              <input value={donateConfig.url} onChange={(e) => setDonateConfig((prev) => ({ ...prev, url: e.target.value }))} placeholder="捐赠链接（可选）" />
+            </div>
+            
             {showDisclaimer ? (
               <div className="disclaimer">
-                <p>免责声明：你提供的 API Key 默认仅在本地浏览器使用，不上传到本项目服务器。</p>
-                <p>但本地保存仍存在设备或浏览器插件风险，请使用低权限或专用 Key，并自行承担风险。</p>
+                <p>API Key 仅在本地浏览器使用，不会上传服务器。请使用低权限 Key 并自行承担风险。</p>
                 <button className="ghostButton" onClick={() => setShowDisclaimer(false)}>我已了解</button>
               </div>
             ) : null}
             <div className="actionRow">
-              <button className="ghostButton" onClick={() => setShowApiModal(false)}>完成设置</button>
+              <button onClick={() => setShowApiModal(false)}>完成</button>
             </div>
           </div>
         </div>
