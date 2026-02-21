@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import seedanceSkillGuide from '../SKILL.md?raw'
 
 type Mode = 'simple' | 'pro'
 type MaterialType = '图片' | '视频' | '音频'
@@ -44,9 +45,17 @@ const freeDailyLimit = 5
 const monetizationEnabled = false
 
 const donateQrs = {
-  wechatQr: '/donate/wechat.png',
-  alipayQr: '/donate/alipay.png',
+  wechatQr: '/donate/wechat.jpg',
+  alipayQr: '/donate/alipay.jpg',
 }
+
+const aiSystemPrompt = [
+  '你是 Seedance 提示词优化助手，必须使用中文输出，优先产出可直接复制到即梦 Seedance 2 的高质量提示词。',
+  '请严格遵循下方 skills 规范中的约束、@引用语法、分时段结构、运镜与音频设计要求。',
+  '当用户输入存在歧义时，给出最稳妥可执行版本，不要输出与 Seedance 规则冲突的内容。',
+  '',
+  seedanceSkillGuide,
+].join('\n')
 const defaultApiConfig: ApiConfig = {
   provider: 'OpenAI兼容',
   apiKey: '',
@@ -378,7 +387,7 @@ function App() {
           messages: [
             {
               role: 'system',
-              content: '你是 Seedance 提示词优化助手。请输出中文自然语言提示词，确保时长与用户输入一致，并给出分段、镜头、音频建议。',
+              content: aiSystemPrompt,
             },
             { role: 'user', content: prompt },
           ],
