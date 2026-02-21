@@ -492,7 +492,7 @@ function App() {
       <header className="hero card">
         <div>
           <p className="brand">豆包即梦</p>
-          <h1>Seedance 提示词工作台</h1>
+          <h1>豆包即梦 Seedance 2 Prompt Studio</h1>
           <p className="subtitle">默认给新手：你只要说想法，我来帮你组织成可用提示词。</p>
         </div>
         <div className="heroActions">
