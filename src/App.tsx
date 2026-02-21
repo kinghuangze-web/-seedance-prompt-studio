@@ -4,8 +4,8 @@ import './App.css'
 type Mode = 'simple' | 'pro'
 type MaterialType = '图片' | '视频' | '音频'
 type PromptType = '短剧片段' | '产品广告' | '科普动画' | '自定义模式'
-type DonatePlatform = '爱发电' | 'Ko-fi' | 'Buy Me a Coffee' | '其他'
 type ApiProvider = 'OpenAI兼容' | '自定义'
+type DonateTab = 'wechat' | 'alipay'
 
 type MaterialItem = { id: string; type: MaterialType; name: string; purpose: string; fileName?: string }
 type Segment = { id: string; time: string; visual: string; action: string; camera: string; audio: string }
@@ -38,13 +38,15 @@ type ApiConfig = {
 }
 
 const storageKey = 'zhexin-seedance-mvp-v2'
-const donateStorageKey = 'zhexin-donate-config-v1'
 const usageStorageKey = 'zhexin-usage-v1'
 const apiStorageKey = 'zhexin-api-config-v1'
 const freeDailyLimit = 5
 const monetizationEnabled = false
 
-const defaultDonateConfig: { platform: DonatePlatform; url: string } = { platform: '爱发电', url: '' }
+const donateQrs = {
+  wechatQr: '/donate/wechat.png',
+  alipayQr: '/donate/alipay.png',
+}
 const defaultApiConfig: ApiConfig = {
   provider: 'OpenAI兼容',
   apiKey: '',
@@ -202,6 +204,8 @@ function App() {
   const [copied, setCopied] = useState(false)
   const [showPaywall, setShowPaywall] = useState(false)
   const [showApiModal, setShowApiModal] = useState(false)
+  const [showSupportModal, setShowSupportModal] = useState(false)
+  const [donateTab, setDonateTab] = useState<DonateTab>('wechat')
   const [showDisclaimer, setShowDisclaimer] = useState(true)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
@@ -217,17 +221,6 @@ function App() {
       return parsed
     } catch {
       return { date: today, dailyCount: 0, totalCount: 0 }
-    }
-  })
-
-  const [donateConfig, setDonateConfig] = useState<{ platform: DonatePlatform; url: string }>(() => {
-    const raw = localStorage.getItem(donateStorageKey)
-    if (!raw) return defaultDonateConfig
-    try {
-      return JSON.parse(raw) as { platform: DonatePlatform; url: string }
-    } catch {
-      localStorage.removeItem(donateStorageKey)
-      return defaultDonateConfig
     }
   })
 
@@ -248,10 +241,6 @@ function App() {
   }, [s])
 
   useEffect(() => {
-    localStorage.setItem(donateStorageKey, JSON.stringify(donateConfig))
-  }, [donateConfig])
-
-  useEffect(() => {
     localStorage.setItem(usageStorageKey, JSON.stringify(usage))
   }, [usage])
 
@@ -266,13 +255,7 @@ function App() {
     }
   }, [apiConfig])
 
-  const donateUrl = useMemo(() => {
-    const raw = donateConfig.url.trim()
-    if (!raw) return ''
-    return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`
-  }, [donateConfig.url])
-
-  const canDonate = /^https?:\/\/.+/i.test(donateUrl)
+  const hasDonateQrs = true
 
   const warnings = useMemo(() => {
     const out: string[] = []
@@ -472,9 +455,9 @@ function App() {
     setTimeout(() => setCopied(false), 1200)
   }
 
-  const openDonateLink = () => {
-    if (!canDonate) return
-    window.open(donateUrl, '_blank', 'noopener,noreferrer')
+  const openSupportModal = () => {
+    setDonateTab('wechat')
+    setShowSupportModal(true)
   }
 
   const download = (name: string, content: string, type: string) => {
@@ -498,13 +481,14 @@ function App() {
         <div className="heroActions">
           <button className="ghostButton" onClick={() => applyPreset('短剧片段')}>一键示例</button>
           <button className="ghostButton" onClick={() => setShowApiModal(true)}>设置</button>
-          {canDonate && <button className="donateButton" onClick={openDonateLink}>支持作者</button>}
+          {hasDonateQrs ? <button className="donateButton" onClick={openSupportModal}>打赏支持作者</button> : null}
         </div>
       </header>
 
       <section className="quickBar card">
         <div className="quickMeta">
           <span className="freeTag">完全免费，无次数限制</span>
+          {hasDonateQrs ? <button className="inlineDonate" onClick={openSupportModal}>喜欢这个工具？支持作者持续更新</button> : null}
         </div>
       </section>
 
@@ -627,14 +611,6 @@ function App() {
               </label>
             </div>
             
-            <h4 style={{margin: '1.5rem 0 0.5rem'}}>支持作者</h4>
-            <div className="apiModalGrid">
-              <select value={donateConfig.platform} onChange={(e) => setDonateConfig((prev) => ({ ...prev, platform: e.target.value as DonatePlatform }))}>
-                <option>爱发电</option><option>Ko-fi</option><option>Buy Me a Coffee</option><option>其他</option>
-              </select>
-              <input value={donateConfig.url} onChange={(e) => setDonateConfig((prev) => ({ ...prev, url: e.target.value }))} placeholder="捐赠链接（可选）" />
-            </div>
-            
             {showDisclaimer ? (
               <div className="disclaimer">
                 <p>API Key 仅在本地浏览器使用，不会上传服务器。请使用低权限 Key 并自行承担风险。</p>
@@ -648,6 +624,26 @@ function App() {
         </div>
       ) : null}
 
+      {showSupportModal ? (
+        <div className="modalMask" onClick={() => setShowSupportModal(false)}>
+          <div className="modalCard supportModal" onClick={(e) => e.stopPropagation()}>
+            <h3>感谢支持</h3>
+            <p className="helper">如果这个工具帮到了你，欢迎打赏支持作者持续更新。</p>
+            <div className="supportTabs">
+              <button className={donateTab === 'wechat' ? 'activeTab' : 'ghostButton'} onClick={() => setDonateTab('wechat')}>微信支付</button>
+              <button className={donateTab === 'alipay' ? 'activeTab' : 'ghostButton'} onClick={() => setDonateTab('alipay')}>支付宝</button>
+            </div>
+            <div className="qrPanel">
+              {donateTab === 'wechat' ? <img src={donateQrs.wechatQr} alt="微信收款码" /> : null}
+              {donateTab === 'alipay' ? <img src={donateQrs.alipayQr} alt="支付宝收款码" /> : null}
+            </div>
+            <div className="actionRow">
+              <button className="ghostButton" onClick={() => setShowSupportModal(false)}>我知道了</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {monetizationEnabled && showPaywall ? (
         <div className="modalMask" onClick={() => setShowPaywall(false)}>
           <div className="modalCard" onClick={(e) => e.stopPropagation()}>
@@ -655,7 +651,7 @@ function App() {
             <p>你今日免费次数已用完（{freeDailyLimit}次）。继续生成请支持创作者。</p>
             <p>建议方案：日卡 1.9 元 / 24h，周卡 6.9 元 / 7天。</p>
             <div className="actionRow">
-              <button onClick={openDonateLink} disabled={!canDonate}>立即支持</button>
+              <button onClick={openSupportModal} disabled={!hasDonateQrs}>立即支持</button>
               <button className="ghostButton" onClick={() => setShowPaywall(false)}>继续编辑（暂不生成）</button>
             </div>
           </div>
